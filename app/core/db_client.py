@@ -44,7 +44,13 @@ class DbClient:
         logger.info(f"Entered connect_to_postgres with :{self.config}")
         try:
             logger.info("Entered try block in connect_to_postgres")
-            db_config = self.config
+            db_config = {
+                "host": self.config.DB_HOST,
+                "port": self.config.DB_PORT,
+                "database": self.config.DB_NAME,
+                "user": self.config.DB_USER,
+                "password": self.config.DB_PASSWORD,
+            }
             self.connection = psycopg2.connect(**db_config)
             return self.connection
         except Exception as e:
@@ -54,6 +60,7 @@ class DbClient:
         """Execute a SQL query and return the results as a list of dictionaries."""
         import psycopg2.extras
 
+        cursor = None
         try:
             cursor = self.connection.cursor(
                 cursor_factory=psycopg2.extras.RealDictCursor
@@ -69,7 +76,20 @@ class DbClient:
                 self.connection.commit()
                 return {"affected_rows": cursor.rowcount}
         except Exception as e:
-            self.connection.rollback()
+            if self.connection:
+                self.connection.rollback()
             raise Exception(f"Query execution failed: {str(e)}")
         finally:
-            cursor.close()
+            if cursor:
+                cursor.close()
+
+    def close(self):
+        """Close the database connection."""
+        if self.connection:
+            try:
+                self.connection.close()
+                logger.info("Database connection closed")
+            except Exception as e:
+                logger.error(f"Error closing connection: {e}")
+        else:
+            logger.warning("No active connection to close")
