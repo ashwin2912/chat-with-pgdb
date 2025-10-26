@@ -1,10 +1,13 @@
 # chat-with-pgdb
 
-A chat interface for PostgreSQL databases.
+A natural language to SQL query API for PostgreSQL databases using Claude AI.
 
-## Status
+## Features
 
-Just getting started - early development phase.
+- Convert natural language questions to SQL queries
+- Execute queries safely (read-only)
+- FastAPI-based REST API
+- Modular, testable architecture
 
 ## Setup
 
@@ -13,16 +16,53 @@ Just getting started - early development phase.
    pip install -r requirements.txt
    ```
 
-2. Configure database connection in `.env`:
-   ```
+2. Configure `.env`:
+   ```bash
+   # Database (use read-only user)
    DB_HOST=localhost
    DB_PORT=5432
    DB_NAME=your_database
-   DB_USER=your_user
+   DB_USER=your_readonly_user
    DB_PASSWORD=your_password
+   
+   # Anthropic API
+   ANTHROPIC_API_KEY=your_api_key
    ```
 
-3. Run:
-   ```bash
-   python main.py
-   ```
+## Running the API
+
+Start the server:
+```bash
+python main.py
+```
+
+API available at: `http://localhost:8000`
+
+### API Endpoints
+
+**Health Check**
+```bash
+curl http://localhost:8000/health
+```
+
+**Ask Question**
+```bash
+curl -X POST http://localhost:8000/ask_question \
+  -H "Content-Type: application/json" \
+  -d '{"question": "How many actors are in the database?"}'
+```
+
+**API Docs**: http://localhost:8000/docs
+
+## Testing
+
+```bash
+# Unit tests only
+pytest tests/ -v -m "not integration"
+
+# All tests
+pytest tests/ -v
+
+# Test agent directly
+python test_agent.py
+```

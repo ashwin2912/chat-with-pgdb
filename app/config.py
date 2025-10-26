@@ -19,6 +19,9 @@ class Config:
         )  # Allow empty password for local dev
         self.DB_PORT: int = int(os.getenv("DB_PORT", "5432"))
 
+        # LLM Configuration
+        self.ANTHROPIC_API_KEY: str = self._get_required("ANTHROPIC_API_KEY")
+
     def _get_required(self, key: str) -> str:
         """Get required environment variable or raise error."""
         value = os.getenv(key)
